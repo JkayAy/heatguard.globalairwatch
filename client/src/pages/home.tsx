@@ -11,6 +11,8 @@ import { HealthGuidance } from "@/components/health-guidance";
 import { ErrorDisplay } from "@/components/error-display";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { SavedLocations } from "@/components/saved-locations";
+import { HeroSection } from "@/components/hero-section";
+import { Footer } from "@/components/footer";
 import {
   WeatherCardSkeleton,
   HourlyForecastSkeleton,
@@ -320,20 +322,25 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto space-y-6">
-              <div className="text-center space-y-2">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                  Real-time Heat Safety Information
-                </h2>
-                <p className="text-base text-muted-foreground">
-                  Get current heat risk levels and forecasts for any location
-                </p>
+            <>
+              {!selectedLocation && !weatherLoading && !weatherData && (
+                <HeroSection
+                  onSearchClick={() => {
+                    const searchInput = document.querySelector('[data-testid="input-search"]') as HTMLInputElement;
+                    searchInput?.focus();
+                  }}
+                  onLocationClick={handleUseMyLocation}
+                />
+              )}
+              <div className="max-w-3xl mx-auto space-y-6 py-8">
+                {renderSearchAndWeatherContent()}
               </div>
-              {renderSearchAndWeatherContent()}
-            </div>
+            </>
           )}
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 }
