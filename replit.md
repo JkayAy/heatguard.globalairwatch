@@ -32,7 +32,8 @@ Preferred communication style: Simple, everyday language.
 **State Management:**
 - React Query for asynchronous data fetching and caching (10-minute stale time for weather data)
 - Local React state for UI interactions (search, dropdowns, mobile menu)
-- Custom hooks for reusable logic (use-mobile, use-toast)
+- Custom hooks for reusable logic (useAuth, usePreferences, useTemperatureUnit, use-mobile, use-toast)
+- Temperature unit preference dynamically applied across all displays
 
 **Component Structure:**
 - Atomic design pattern with ui components as primitives
@@ -47,9 +48,18 @@ Preferred communication style: Simple, everyday language.
 
 **API Design:**
 - RESTful endpoints for geocoding and weather data
+- Authentication endpoints via Replit OpenID Connect
 - Route structure:
-  - `/api/geocoding/search?q={query}` - Location search
-  - `/api/weather?latitude={lat}&longitude={lon}` - Weather data retrieval
+  - `/api/login` - Initiate Replit Auth login flow
+  - `/api/logout` - Log out and clear session
+  - `/api/callback` - OAuth callback handler
+  - `/api/auth/user` - Get current authenticated user (protected)
+  - `/api/preferences` - Get/update user preferences (protected)
+  - `/api/saved-locations` - CRUD for saved locations (protected)
+  - `/api/weather-history` - Get historical weather data (public)
+  - `/api/geocoding/search?q={query}` - Location search (public)
+  - `/api/geocoding/reverse?lat={lat}&lon={lon}` - Reverse geocoding (public)
+  - `/api/weather?latitude={lat}&longitude={lon}&name={name}...` - Weather data (public)
 
 **Caching Strategy:**
 - NodeCache for in-memory API response caching
@@ -71,23 +81,42 @@ Preferred communication style: Simple, everyday language.
 - Vite middleware integration in development for HMR
 - Static file serving in production from dist/public
 - Environment-based configuration through NODE_ENV
+- Session cookies: secure=false in development (HTTP), secure=true in production (HTTPS)
+- Auth callback URLs dynamically generated from request protocol and host
+
+**Authentication:**
+- Replit Auth (OpenID Connect) for user authentication
+- Supports Google, GitHub, X, Apple, and email/password login methods
+- Session storage in PostgreSQL with 7-day TTL
+- Automatic token refresh for expired sessions
+- Protected routes require valid authentication
 
 ### Data Storage
 
 **Current Implementation:**
-- In-memory storage using Map data structures (MemStorage class)
-- User management interface defined but minimal usage in current weather-focused features
+- PostgreSQL database via Neon serverless driver with DatabaseStorage class
+- Full user authentication and session management via Replit Auth (OpenID Connect)
+- Persistent user preferences and saved locations
+
+**Database Schema:**
+- **users**: User accounts from Replit Auth (id, email, firstName, lastName, profileImageUrl)
+- **sessions**: Express session storage for authentication (required for Replit Auth)
+- **user_preferences**: User settings (temperatureUnit: C|F, emailAlertsEnabled, alertEmail)
+- **saved_locations**: User's saved locations with default flag
+- **weather_history**: Historical weather records with location and risk data
 
 **Database Configuration:**
-- Drizzle ORM configured for PostgreSQL via Neon serverless driver
-- Schema defined in shared/schema.ts for potential future persistence
-- Migration support via drizzle-kit
-- Session storage capability with connect-pg-simple (currently unused)
+- Drizzle ORM for type-safe database queries
+- Migration via `npm run db:push` command
+- Foreign keys with cascade delete for user-related data
+- Indexes on latitude/longitude and recorded dates for efficient history queries
+- 4-decimal coordinate precision in cache keys (~11m accuracy)
 
 **Schema Design:**
 - Zod schemas for runtime validation of API responses and data types
-- Type-safe models generated from Zod schemas using TypeScript inference
+- Type-safe models generated from Drizzle table schemas
 - Shared schema definitions between client and server
+- Insert schemas with validation via drizzle-zod
 
 ### External Dependencies
 

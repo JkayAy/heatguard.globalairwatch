@@ -2,16 +2,18 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, MapPin, X, LogIn } from "lucide-react";
 import { WeatherCard } from "@/components/weather-card";
 import { HourlyForecastTimeline } from "@/components/hourly-forecast";
 import { HealthGuidance } from "@/components/health-guidance";
 import { ErrorDisplay } from "@/components/error-display";
+import { SettingsDialog } from "@/components/settings-dialog";
 import {
   WeatherCardSkeleton,
   HourlyForecastSkeleton,
   HealthGuidanceSkeleton,
 } from "@/components/loading-skeleton";
+import { useAuth } from "@/hooks/useAuth";
 import type { Location, WeatherData } from "@shared/schema";
 
 export default function Home() {
@@ -20,6 +22,7 @@ export default function Home() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth();
 
   const { data: suggestions, isLoading: searchLoading } = useQuery<Location[]>({
     queryKey: [`/api/geocoding/search?q=${encodeURIComponent(searchQuery)}`],
@@ -126,6 +129,36 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
         <div className="space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex-1" />
+            <div className="flex gap-2">
+              {isAuthenticated ? (
+                <>
+                  <SettingsDialog />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => window.location.href = '/api/logout'}
+                    data-testid="button-logout"
+                    aria-label="Log out"
+                  >
+                    <LogIn className="h-5 w-5" />
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => window.location.href = '/api/login'}
+                  data-testid="button-login"
+                  aria-label="Log in"
+                >
+                  <LogIn className="h-5 w-5" />
+                </Button>
+              )}
+            </div>
+          </div>
+
           <div className="text-center space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
               Heat Risk Alert

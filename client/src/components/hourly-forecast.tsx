@@ -3,12 +3,14 @@ import { Sun, CloudSun } from "lucide-react";
 import type { HourlyForecast } from "@shared/schema";
 import { formatTime } from "@/lib/heat-utils";
 import { RiskBadge } from "./risk-badge";
+import { useTemperatureUnit } from "@/hooks/useTemperatureUnit";
 
 interface HourlyForecastTimelineProps {
   hourly: HourlyForecast[];
 }
 
 export function HourlyForecastTimeline({ hourly }: HourlyForecastTimelineProps) {
+  const { format } = useTemperatureUnit();
   const now = new Date();
   const currentHour = now.getHours();
   
@@ -42,7 +44,7 @@ export function HourlyForecastTimeline({ hourly }: HourlyForecastTimelineProps) 
                 </p>
                 <Icon className="h-10 w-10 text-primary" data-testid={`icon-weather-${index}`} />
                 <p className="text-lg font-semibold tabular-nums text-foreground" data-testid={`text-temp-${index}`}>
-                  {Math.round(hour.temperature)}°C
+                  {format(hour.temperature)}
                 </p>
                 <RiskBadge level={hour.riskLevel} size="sm" />
               </div>

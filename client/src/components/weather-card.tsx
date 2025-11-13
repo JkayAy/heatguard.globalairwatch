@@ -3,6 +3,7 @@ import { Droplets, Thermometer, Gauge, Clock } from "lucide-react";
 import type { WeatherData } from "@shared/schema";
 import { formatDateTime } from "@/lib/heat-utils";
 import { RiskBadge } from "./risk-badge";
+import { useTemperatureUnit } from "@/hooks/useTemperatureUnit";
 
 interface WeatherCardProps {
   data: WeatherData;
@@ -10,6 +11,7 @@ interface WeatherCardProps {
 
 export function WeatherCard({ data }: WeatherCardProps) {
   const { current, location, heatIndex, riskLevel } = data;
+  const { format } = useTemperatureUnit();
 
   return (
     <Card className="p-6 md:p-8 rounded-2xl" data-testid="card-current-weather">
@@ -26,7 +28,7 @@ export function WeatherCard({ data }: WeatherCardProps) {
 
         <div className="flex justify-center">
           <p className="text-6xl md:text-7xl font-bold tabular-nums text-foreground" data-testid="text-temperature">
-            {Math.round(current.temperature)}°C
+            {format(current.temperature)}
           </p>
         </div>
 
@@ -51,7 +53,7 @@ export function WeatherCard({ data }: WeatherCardProps) {
               <span>Feels Like</span>
             </div>
             <p className="text-2xl md:text-3xl font-semibold tabular-nums text-foreground" data-testid="text-apparent-temp">
-              {Math.round(current.apparentTemperature)}°C
+              {format(current.apparentTemperature)}
             </p>
           </div>
 
@@ -61,7 +63,7 @@ export function WeatherCard({ data }: WeatherCardProps) {
               <span>Heat Index</span>
             </div>
             <p className="text-2xl md:text-3xl font-semibold tabular-nums text-foreground" data-testid="text-heat-index">
-              {Math.round(heatIndex)}°C
+              {format(heatIndex)}
             </p>
           </div>
 
