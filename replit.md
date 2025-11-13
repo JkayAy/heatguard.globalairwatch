@@ -2,7 +2,7 @@
 
 ## Overview
 
-A real-time heat risk monitoring web application that provides location-based weather data, heat index calculations, and safety guidance. The application helps users stay informed about dangerous heat conditions by displaying current weather conditions, hourly forecasts, and risk-level categorizations with corresponding health recommendations.
+A production-ready real-time heat risk monitoring web application that provides location-based weather data, 7-day extended forecasts, heat index calculations, and safety guidance. The application features custom-branded authentication, comprehensive weather visualization with daily forecasts, risk trend analysis, and personalized health recommendations to help users stay informed about dangerous heat conditions.
 
 ## User Preferences
 
@@ -37,7 +37,7 @@ Preferred communication style: Simple, everyday language.
 
 **Component Structure:**
 - Atomic design pattern with ui components as primitives
-- Feature-specific components (WeatherCard, HourlyForecast, HealthGuidance, RiskBadge)
+- Feature-specific components (WeatherCard, HourlyForecastTimeline, DailyForecastCard, RiskTrendVisualization, HealthGuidance)
 - Shared utility components (ErrorDisplay, LoadingSkeleton)
 
 ### Backend Architecture
@@ -48,18 +48,22 @@ Preferred communication style: Simple, everyday language.
 
 **API Design:**
 - RESTful endpoints for geocoding and weather data
-- Authentication endpoints via Replit OpenID Connect
+- Custom authentication system using passport-local
 - Route structure:
-  - `/api/login` - Initiate Replit Auth login flow
-  - `/api/logout` - Log out and clear session
-  - `/api/callback` - OAuth callback handler
+  - `/api/auth/signup` - Create new user account (public)
+  - `/api/auth/login` - Authenticate user with email/password (public)
+  - `/api/auth/logout` - Destroy session (authenticated)
   - `/api/auth/user` - Get current authenticated user (protected)
+  - `/api/auth/forgot-password` - Request password reset email (public)
+  - `/api/auth/reset-password` - Reset password with token (public)
+  - `/api/auth/verify-email` - Verify email address with token (public)
+  - `/api/auth/resend-verification` - Resend verification email (authenticated)
   - `/api/preferences` - Get/update user preferences (protected)
   - `/api/saved-locations` - CRUD for saved locations (protected)
   - `/api/weather-history` - Get historical weather data (public)
   - `/api/geocoding/search?q={query}` - Location search (public)
   - `/api/geocoding/reverse?lat={lat}&lon={lon}` - Reverse geocoding (public)
-  - `/api/weather?latitude={lat}&longitude={lon}&name={name}...` - Weather data (public)
+  - `/api/weather?latitude={lat}&longitude={lon}&name={name}...` - Weather data with 7-day forecast (public)
 
 **Caching Strategy:**
 - NodeCache for in-memory API response caching
@@ -68,14 +72,15 @@ Preferred communication style: Simple, everyday language.
 - Reduces external API calls and improves response times
 
 **Data Processing:**
-- Server-side heat index calculations using NOAA algorithm
-- Temperature conversions (Celsius ↔ Fahrenheit)
+- Server-side heat index calculations using NOAA algorithm for both maximum and minimum temperatures
+- Temperature conversions (Celsius ↔ Fahrenheit) for API integration and display
 - Risk level categorization based on heat index thresholds:
   - Normal: < 80°F
   - Caution: 80-90°F
   - Extreme Caution: 91-102°F
   - Danger: 103-124°F
   - Extreme Danger: ≥ 125°F
+- 7-day daily forecast processing with precipitation probability and wind speed
 
 **Development vs Production:**
 - Vite middleware integration in development for HMR
@@ -85,24 +90,29 @@ Preferred communication style: Simple, everyday language.
 - Auth callback URLs dynamically generated from request protocol and host
 
 **Authentication:**
-- Replit Auth (OpenID Connect) for user authentication
-- Supports Google, GitHub, X, Apple, and email/password login methods
-- Session storage in PostgreSQL with 7-day TTL
-- Automatic token refresh for expired sessions
+- Custom email/password authentication using passport-local strategy
+- Bcrypt password hashing (10 salt rounds) for secure credential storage
+- SHA-256 token hashing for email verification and password reset tokens
+- Session storage in PostgreSQL with connect-pg-simple and 7-day TTL
+- Rate limiting on authentication endpoints (5-15 requests per 15 minutes)
+- Email verification flow with resend capability
+- Secure password reset flow with token expiration (1 hour)
+- Session invalidation on password change for security
 - Protected routes require valid authentication
+- Production-ready security measures (HTTPS in production, secure cookies)
 
 ### Data Storage
 
 **Current Implementation:**
 - PostgreSQL database via Neon serverless driver with DatabaseStorage class
-- Full user authentication and session management via Replit Auth (OpenID Connect)
+- Full user authentication and session management
 - Persistent user preferences and saved locations
 
 **Database Schema:**
-- **users**: User accounts from Replit Auth (id, email, firstName, lastName, profileImageUrl)
-- **sessions**: Express session storage for authentication (required for Replit Auth)
+- **users**: User accounts with bcrypt-hashed passwords (id, email, firstName, lastName, passwordHash, isVerified, verificationToken, resetToken)
+- **sessions**: Express session storage (sid, sess, expire) managed by connect-pg-simple
 - **user_preferences**: User settings (temperatureUnit: C|F, emailAlertsEnabled, alertEmail)
-- **saved_locations**: User's saved locations with default flag
+- **saved_locations**: User's saved locations with default flag and user relationship
 - **weather_history**: Historical weather records with location and risk data
 
 **Database Configuration:**
@@ -121,9 +131,10 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **Weather Data Provider:**
-- External weather API (implementation suggests Open-Meteo or similar)
-- Provides current conditions and hourly forecasts
-- Returns temperature, humidity, and apparent temperature data
+- Open-Meteo API for comprehensive weather data
+- Provides current conditions, hourly forecasts (24 hours), and 7-day daily forecasts
+- Returns temperature (max/min), humidity, apparent temperature, precipitation probability, and wind speed
+- Free tier with no API key required (rate-limited by IP)
 
 **Geocoding Service:**
 - Location search and coordinate resolution
