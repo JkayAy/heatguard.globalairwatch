@@ -81,6 +81,18 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        risk: {
+          normal: "hsl(200 70% 50%)",
+          normalForeground: "hsl(0 0% 100%)",
+          caution: "hsl(45 95% 50%)",
+          cautionForeground: "hsl(45 90% 15%)",
+          extremeCaution: "hsl(30 95% 55%)",
+          extremeCautionForeground: "hsl(0 0% 100%)",
+          danger: "hsl(10 90% 50%)",
+          dangerForeground: "hsl(0 0% 100%)",
+          extremeDanger: "hsl(0 85% 40%)",
+          extremeDangerForeground: "hsl(0 0% 100%)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
