@@ -130,136 +130,6 @@ export default function Home() {
     );
   };
 
-  // Shared search and weather content
-  const renderSearchAndWeatherContent = () => (
-    <>
-      <div className="space-y-4">
-        <div className="space-y-3">
-          <div className="relative" ref={searchRef}>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for a city..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                className="h-14 text-lg pl-12 pr-12 rounded-xl"
-                data-testid="input-search"
-              />
-              {searchQuery && (
-                <button
-                  onClick={handleClearSearch}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Clear search"
-                  data-testid="button-clear-search"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              )}
-            </div>
-
-            {showSuggestions && searchQuery.length >= 2 && suggestions && suggestions.length > 0 && (
-              <div
-                className="absolute z-10 w-full mt-2 bg-popover border border-popover-border rounded-lg shadow-xl py-2 max-h-64 overflow-y-auto"
-                data-testid="list-suggestions"
-              >
-                {suggestions.map((location, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectLocation(location)}
-                    className="w-full px-4 py-3 text-left hover-elevate active-elevate-2 transition-colors"
-                    data-testid={`item-suggestion-${index}`}
-                  >
-                    <p className="font-medium text-foreground">{location.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {location.admin1 && `${location.admin1}, `}
-                      {location.country}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-center">
-            <Button
-              onClick={handleUseMyLocation}
-              variant="outline"
-              className="h-14 px-6 rounded-xl gap-2 w-full md:w-auto"
-              data-testid="button-use-location"
-            >
-              <MapPin className="h-5 w-5" />
-              Use My Location
-            </Button>
-          </div>
-
-          {locationError && (
-            <div className="text-center text-sm text-destructive" data-testid="text-location-error">
-              {locationError}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {!selectedLocation && !weatherLoading && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">
-            Search for a city or use your location to see heat risk information
-          </p>
-        </div>
-      )}
-
-      {weatherLoading && (
-        <div className="space-y-6 md:space-y-8">
-          <WeatherCardSkeleton />
-          <HourlyForecastSkeleton />
-          <HealthGuidanceSkeleton />
-        </div>
-      )}
-
-      {weatherError && (
-        <ErrorDisplay
-          title="Unable to Load Weather Data"
-          message="There was an error loading the weather information. Please try again."
-          onRetry={() => refetchWeather()}
-        />
-      )}
-
-      {weatherData && !weatherLoading && (
-        <div className="space-y-6 md:space-y-8">
-          <WeatherCard data={weatherData} />
-          <HourlyForecastTimeline hourly={weatherData.hourly} />
-          
-          {weatherData.daily && weatherData.daily.length > 0 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold" data-testid="heading-7-day-forecast">
-                7-Day Forecast
-              </h2>
-              
-              <RiskTrendVisualization dailyForecasts={weatherData.daily} />
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {weatherData.daily.map((day) => (
-                  <DailyForecastCard
-                    key={day.date}
-                    forecast={day}
-                    temperatureUnit={temperatureUnit as "C" | "F"}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <HealthGuidance riskLevel={weatherData.riskLevel} />
-        </div>
-      )}
-    </>
-  );
-
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="border-b">
@@ -277,7 +147,7 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => window.location.href = '/api/auth/logout'}
+                    onClick={() => window.location.href = '/api/logout'}
                     data-testid="button-logout"
                     aria-label="Log out"
                   >
@@ -287,11 +157,12 @@ export default function Home() {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={() => window.location.href = '/login'}
+                  size="icon"
+                  onClick={() => window.location.href = '/api/login'}
                   data-testid="button-login"
+                  aria-label="Log in"
                 >
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Log In
+                  <LogIn className="h-5 w-5" />
                 </Button>
               )}
             </div>
@@ -308,32 +179,142 @@ export default function Home() {
               </aside>
               
               <div className="space-y-6 md:space-y-8">
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-                    Check Heat Risk
-                  </h2>
-                  <p className="text-base text-muted-foreground">
-                    Search for any location to see heat safety information
-                  </p>
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                      Check Heat Risk
+                    </h2>
+                    <p className="text-base text-muted-foreground">
+                      Search for any location to see heat safety information
+                    </p>
+                  </div>
+
+          <div className="space-y-3">
+            <div className="relative" ref={searchRef}>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search for a city..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  className="h-14 text-lg pl-12 pr-12 rounded-xl"
+                  data-testid="input-search"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={handleClearSearch}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Clear search"
+                    data-testid="button-clear-search"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
+
+              {showSuggestions && searchQuery.length >= 2 && suggestions && suggestions.length > 0 && (
+                <div
+                  className="absolute z-10 w-full mt-2 bg-popover border border-popover-border rounded-lg shadow-xl py-2 max-h-64 overflow-y-auto"
+                  data-testid="list-suggestions"
+                >
+                  {suggestions.map((location, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSelectLocation(location)}
+                      className="w-full px-4 py-3 text-left hover-elevate active-elevate-2 transition-colors"
+                      data-testid={`item-suggestion-${index}`}
+                    >
+                      <p className="font-medium text-foreground">{location.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {location.admin1 && `${location.admin1}, `}
+                        {location.country}
+                      </p>
+                    </button>
+                  ))}
                 </div>
-                {renderSearchAndWeatherContent()}
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="max-w-3xl mx-auto space-y-6">
-              <div className="text-center space-y-2">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground">
-                  Real-time Heat Safety Information
-                </h2>
-                <p className="text-base text-muted-foreground">
-                  Get current heat risk levels and forecasts for any location
-                </p>
-              </div>
-              {renderSearchAndWeatherContent()}
+
+            <div className="flex justify-center">
+              <Button
+                onClick={handleUseMyLocation}
+                variant="outline"
+                className="h-14 px-6 rounded-xl gap-2 w-full md:w-auto"
+                data-testid="button-use-location"
+              >
+                <MapPin className="h-5 w-5" />
+                Use My Location
+              </Button>
             </div>
-          )}
+
+            {locationError && (
+              <div className="text-center text-sm text-destructive" data-testid="text-location-error">
+                {locationError}
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+
+        {!selectedLocation && !weatherLoading && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">
+              Search for a city or use your location to see heat risk information
+            </p>
+          </div>
+        )}
+
+        {weatherLoading && (
+          <div className="space-y-6 md:space-y-8">
+            <WeatherCardSkeleton />
+            <HourlyForecastSkeleton />
+            <HealthGuidanceSkeleton />
+          </div>
+        )}
+
+        {weatherError && (
+          <ErrorDisplay
+            title="Unable to Load Weather Data"
+            message="There was an error loading the weather information. Please try again."
+            onRetry={() => refetchWeather()}
+          />
+        )}
+
+        {weatherData && !weatherLoading && (
+          <div className="space-y-6 md:space-y-8">
+            <WeatherCard data={weatherData} />
+            <HourlyForecastTimeline hourly={weatherData.hourly} />
+            
+            {weatherData.daily && weatherData.daily.length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold" data-testid="heading-7-day-forecast">
+                  7-Day Forecast
+                </h2>
+                
+                <RiskTrendVisualization dailyForecasts={weatherData.daily} />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {weatherData.daily.map((day) => (
+                    <DailyForecastCard
+                      key={day.date}
+                      forecast={day}
+                      temperatureUnit={temperatureUnit as "C" | "F"}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <HealthGuidance riskLevel={weatherData.riskLevel} />
+          </div>
+        )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
