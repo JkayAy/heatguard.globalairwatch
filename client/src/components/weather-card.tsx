@@ -4,6 +4,7 @@ import type { WeatherData } from "@shared/schema";
 import { formatDateTime } from "@/lib/heat-utils";
 import { RiskBadge } from "./risk-badge";
 import { useTemperatureUnit } from "@/hooks/useTemperatureUnit";
+import { SaveLocationButton } from "./save-location-button";
 
 interface WeatherCardProps {
   data: WeatherData;
@@ -32,8 +33,9 @@ export function WeatherCard({ data }: WeatherCardProps) {
           </p>
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-3">
           <RiskBadge level={riskLevel} size="md" />
+          <SaveLocationButton location={location} />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-4 border-t">

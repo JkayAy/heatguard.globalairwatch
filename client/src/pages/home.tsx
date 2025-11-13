@@ -8,6 +8,7 @@ import { HourlyForecastTimeline } from "@/components/hourly-forecast";
 import { HealthGuidance } from "@/components/health-guidance";
 import { ErrorDisplay } from "@/components/error-display";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { SavedLocations } from "@/components/saved-locations";
 import {
   WeatherCardSkeleton,
   HourlyForecastSkeleton,
@@ -127,37 +128,46 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex-1" />
-            <div className="flex gap-2">
-              {isAuthenticated ? (
-                <>
-                  <SettingsDialog />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => window.location.href = '/api/logout'}
-                    data-testid="button-logout"
-                    aria-label="Log out"
-                  >
-                    <LogIn className="h-5 w-5" />
-                  </Button>
-                </>
-              ) : (
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex-1" />
+          <div className="flex gap-2">
+            {isAuthenticated ? (
+              <>
+                <SettingsDialog />
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => window.location.href = '/api/login'}
-                  data-testid="button-login"
-                  aria-label="Log in"
+                  onClick={() => window.location.href = '/api/logout'}
+                  data-testid="button-logout"
+                  aria-label="Log out"
                 >
                   <LogIn className="h-5 w-5" />
                 </Button>
-              )}
-            </div>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => window.location.href = '/api/login'}
+                data-testid="button-login"
+                aria-label="Log in"
+              >
+                <LogIn className="h-5 w-5" />
+              </Button>
+            )}
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 md:gap-8">
+          {isAuthenticated && (
+            <aside className="space-y-6">
+              <SavedLocations onLocationSelect={handleSelectLocation} />
+            </aside>
+          )}
+          
+          <main className="space-y-6 md:space-y-8">
+            <div className="space-y-4">
 
           <div className="text-center space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -270,6 +280,8 @@ export default function Home() {
             <HealthGuidance riskLevel={weatherData.riskLevel} />
           </div>
         )}
+          </main>
+        </div>
       </div>
     </div>
   );
