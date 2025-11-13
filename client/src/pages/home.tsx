@@ -234,7 +234,16 @@ export default function Home() {
       {weatherData && !weatherLoading && (
         <div className="space-y-6 md:space-y-8">
           <WeatherCard data={weatherData} />
-          <HourlyForecastTimeline hourly={weatherData.hourly} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="space-y-6 min-w-0">
+              <HealthGuidance riskLevel={weatherData.riskLevel} />
+            </div>
+            
+            <div className="space-y-6 min-w-0">
+              <HourlyForecastTimeline hourly={weatherData.hourly} />
+            </div>
+          </div>
           
           {weatherData.daily && weatherData.daily.length > 0 && (
             <div className="space-y-6">
@@ -255,8 +264,6 @@ export default function Home() {
               </div>
             </div>
           )}
-          
-          <HealthGuidance riskLevel={weatherData.riskLevel} />
         </div>
       )}
     </>
