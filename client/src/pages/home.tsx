@@ -41,7 +41,8 @@ export default function Home() {
       return response.json();
     },
     onSuccess: () => {
-      setLocation("/login");
+      setLocation("/");
+      window.location.reload();
     },
   });
 
@@ -314,7 +315,7 @@ export default function Home() {
               ) : (
                 <Button
                   variant="ghost"
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => setLocation('/login')}
                   data-testid="button-login"
                 >
                   <LogIn className="h-5 w-5 mr-2" />

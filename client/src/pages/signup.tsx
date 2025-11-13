@@ -247,8 +247,8 @@ export default function SignupPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground text-center">
             Already have an account?{" "}
             <button
               type="button"
@@ -259,6 +259,14 @@ export default function SignupPage() {
               Sign in
             </button>
           </p>
+          <button
+            type="button"
+            onClick={() => setLocation("/")}
+            className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+            data-testid="link-home"
+          >
+            Back to Home
+          </button>
         </CardFooter>
       </Card>
     </div>

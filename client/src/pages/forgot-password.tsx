@@ -93,24 +93,34 @@ export default function ForgotPasswordPage() {
               The reset link will expire in 1 hour for security reasons.
             </p>
           </CardContent>
-          <CardFooter className="flex justify-center gap-4">
-            <Button
-              onClick={() => setLocation("/login")}
-              variant="outline"
-              data-testid="button-back-to-login"
+          <CardFooter className="flex flex-col gap-4">
+            <div className="flex justify-center gap-4">
+              <Button
+                onClick={() => setLocation("/login")}
+                variant="outline"
+                data-testid="button-back-to-login"
+              >
+                Back to Login
+              </Button>
+              <Button
+                onClick={() => {
+                  setSubmitted(false);
+                  form.reset();
+                }}
+                variant="ghost"
+                data-testid="button-try-again"
+              >
+                Try Different Email
+              </Button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLocation("/")}
+              className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+              data-testid="link-home"
             >
-              Back to Login
-            </Button>
-            <Button
-              onClick={() => {
-                setSubmitted(false);
-                form.reset();
-              }}
-              variant="ghost"
-              data-testid="button-try-again"
-            >
-              Try Different Email
-            </Button>
+              Back to Home
+            </button>
           </CardFooter>
         </Card>
       </div>
@@ -167,14 +177,23 @@ export default function ForgotPasswordPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-wrap justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setLocation("/")}
+            className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+            data-testid="link-home"
+          >
+            Back to Home
+          </button>
+          <span className="text-muted-foreground">•</span>
           <button
             type="button"
             onClick={() => setLocation("/login")}
             className="text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
             data-testid="link-back-to-login"
           >
-            Back to login
+            Back to Login
           </button>
         </CardFooter>
       </Card>

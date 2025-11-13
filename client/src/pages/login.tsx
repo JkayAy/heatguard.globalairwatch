@@ -149,6 +149,15 @@ export default function LoginPage() {
           <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
             <button
               type="button"
+              onClick={() => setLocation("/")}
+              className="hover:text-foreground underline-offset-4 hover:underline"
+              data-testid="link-home"
+            >
+              Back to Home
+            </button>
+            <span>•</span>
+            <button
+              type="button"
               onClick={() => setLocation("/forgot-password")}
               className="hover:text-foreground underline-offset-4 hover:underline"
               data-testid="link-forgot-password"
