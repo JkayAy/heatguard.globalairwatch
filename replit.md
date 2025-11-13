@@ -21,13 +21,21 @@ Preferred communication style: Simple, everyday language.
 **UI Framework:**
 - shadcn/ui component library built on Radix UI primitives
 - Tailwind CSS for utility-first styling with custom design tokens
-- Material Design principles combined with weather app best practices
+- Professional, trustworthy design inspired by NOAA/government weather services
 
 **Design System:**
 - Typography: Inter/Roboto font family via Google Fonts
-- Custom color palette with CSS variables supporting light/dark modes
+- Clean neutral color palette (white/light backgrounds, no warm gradients)
+- Professional hero section with NOAA-branded badge and calm appearance
+- Simplified footer with essential attribution only (no placeholder links)
 - Consistent spacing scale using Tailwind's spacing units (2, 4, 6, 8, 12, 16)
 - Responsive breakpoints with mobile-first approach
+
+**Design Philosophy:**
+- Trustworthy over flashy: Clean, professional appearance like government weather services
+- Honest presentation: Only show links and features that actually exist
+- Credibility through attribution: Prominent Open-Meteo and NOAA references
+- Calm reassurance: Neutral colors instead of urgent heat warning aesthetics
 
 **State Management:**
 - React Query for asynchronous data fetching and caching (10-minute stale time for weather data)
@@ -37,8 +45,9 @@ Preferred communication style: Simple, everyday language.
 
 **Component Structure:**
 - Atomic design pattern with ui components as primitives
-- Feature-specific components (WeatherCard, HourlyForecastTimeline, DailyForecastCard, RiskTrendVisualization, HealthGuidance)
+- Feature-specific components (WeatherCard, HourlyForecastTimeline, DailyForecastCard, RiskTrendVisualization, HealthGuidance, AirQualityCard)
 - Shared utility components (ErrorDisplay, LoadingSkeleton)
+- Layout components (HeroSection, Footer) with professional, trustworthy design
 
 ### Backend Architecture
 
@@ -81,6 +90,14 @@ Preferred communication style: Simple, everyday language.
   - Danger: 103-124°F
   - Extreme Danger: ≥ 125°F
 - 7-day daily forecast processing with precipitation probability and wind speed
+- Air Quality Index (AQI) integration with EPA standard levels:
+  - Good: 0-50
+  - Moderate: 51-100
+  - Unhealthy for Sensitive: 101-150
+  - Unhealthy: 151-200
+  - Very Unhealthy: 201-300
+  - Hazardous: 301+
+- Combined heat + air quality health impact warnings
 
 **Development vs Production:**
 - Vite middleware integration in development for HMR
@@ -135,6 +152,13 @@ Preferred communication style: Simple, everyday language.
 - Provides current conditions, hourly forecasts (24 hours), and 7-day daily forecasts
 - Returns temperature (max/min), humidity, apparent temperature, precipitation probability, and wind speed
 - Free tier with no API key required (rate-limited by IP)
+
+**Air Quality Data Provider:**
+- Open-Meteo Air Quality API for real-time AQI data
+- Provides US AQI, PM2.5, and PM10 measurements
+- Non-fatal integration: weather data returns even if AQI unavailable
+- Cached alongside weather data (10-minute TTL)
+- Free tier with no API key required
 
 **Geocoding Service:**
 - Location search and coordinate resolution
