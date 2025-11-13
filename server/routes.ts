@@ -10,6 +10,7 @@ import {
   geocodingResponseSchema,
   type Location,
   type WeatherData,
+  type AqiLevel,
   insertUserPreferencesSchema,
   insertSavedLocationSchema,
 } from "@shared/schema";
@@ -69,6 +70,15 @@ function getHeatRiskLevel(heatIndex: number) {
   if (heatIndex < 103) return "extreme_caution";
   if (heatIndex < 125) return "danger";
   return "extreme_danger";
+}
+
+function getAqiLevel(aqi: number): AqiLevel {
+  if (aqi <= 50) return "good";
+  if (aqi <= 100) return "moderate";
+  if (aqi <= 150) return "unhealthy_sensitive";
+  if (aqi <= 200) return "unhealthy";
+  if (aqi <= 300) return "very_unhealthy";
+  return "hazardous";
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -396,6 +406,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         admin1,
       };
 
+      // Fetch air quality data
+      let airQuality = undefined;
+      try {
+        const aqiResponse = await axios.get(
+          "https://air-quality-api.open-meteo.com/v1/air-quality",
+          {
+            params: {
+              latitude: lat,
+              longitude: lon,
+              current: "us_aqi,pm2_5,pm10",
+            },
+          }
+        );
+
+        const aqiData = aqiResponse.data;
+        
+        if (aqiData?.current && typeof aqiData.current.us_aqi === "number") {
+          const aqi = Math.round(aqiData.current.us_aqi);
+          const pm25 = aqiData.current.pm2_5 || 0;
+          const pm10 = aqiData.current.pm10 || 0;
+          const level = getAqiLevel(aqi);
+          
+          airQuality = {
+            aqi,
+            pm25,
+            pm10,
+            level,
+            time: aqiData.current.time || data.current.time,
+          };
+        }
+      } catch (aqiError) {
+        console.error("Air quality API error (non-fatal):", aqiError);
+      }
+
       const weatherData: WeatherData = {
         current: {
           temperature: currentTempC,
@@ -408,6 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         location,
         heatIndex,
         riskLevel,
+        airQuality,
       };
 
       apiCache.set(cacheKey, weatherData);

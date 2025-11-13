@@ -13,6 +13,7 @@ import { SettingsDialog } from "@/components/settings-dialog";
 import { SavedLocations } from "@/components/saved-locations";
 import { HeroSection } from "@/components/hero-section";
 import { Footer } from "@/components/footer";
+import { AirQualityCard } from "@/components/air-quality-card";
 import {
   WeatherCardSkeleton,
   HourlyForecastSkeleton,
@@ -238,6 +239,9 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
             <div className="space-y-6 min-w-0">
               <HealthGuidance riskLevel={weatherData.riskLevel} />
+              {weatherData.airQuality && (
+                <AirQualityCard airQuality={weatherData.airQuality} heatRiskLevel={weatherData.riskLevel} />
+              )}
             </div>
             
             <div className="space-y-6 min-w-0">

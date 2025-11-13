@@ -124,6 +124,23 @@ export const heatRiskLevel = z.enum([
   "extreme_danger",
 ]);
 
+export const aqiLevel = z.enum([
+  "good",
+  "moderate",
+  "unhealthy_sensitive",
+  "unhealthy",
+  "very_unhealthy",
+  "hazardous",
+]);
+
+export const airQualitySchema = z.object({
+  aqi: z.number(),
+  pm25: z.number(),
+  pm10: z.number(),
+  level: aqiLevel,
+  time: z.string(),
+});
+
 export const hourlyForecastSchema = z.object({
   time: z.string(),
   temperature: z.number(),
@@ -151,6 +168,7 @@ export const weatherDataSchema = z.object({
   location: locationSchema,
   heatIndex: z.number(),
   riskLevel: heatRiskLevel,
+  airQuality: airQualitySchema.optional(),
 });
 
 export type Location = z.infer<typeof locationSchema>;
@@ -158,6 +176,8 @@ export type CurrentWeather = z.infer<typeof currentWeatherSchema>;
 export type HourlyForecast = z.infer<typeof hourlyForecastSchema>;
 export type DailyForecast = z.infer<typeof dailyForecastSchema>;
 export type HeatRiskLevel = z.infer<typeof heatRiskLevel>;
+export type AqiLevel = z.infer<typeof aqiLevel>;
+export type AirQuality = z.infer<typeof airQualitySchema>;
 export type WeatherData = z.infer<typeof weatherDataSchema>;
 
 export const geocodingResponseSchema = z.object({
