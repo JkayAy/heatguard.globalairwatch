@@ -2,11 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import axios from "axios";
 import { apiCache } from "./cache";
+import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import {
   locationSchema,
   geocodingResponseSchema,
   type Location,
   type WeatherData,
+  insertUserPreferencesSchema,
+  insertSavedLocationSchema,
 } from "@shared/schema";
 
 function celsiusToFahrenheit(celsius: number): number {
@@ -67,6 +71,132 @@ function getHeatRiskLevel(heatIndex: number) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // User preferences routes
+  app.get('/api/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      let prefs = await storage.getUserPreferences(userId);
+      
+      // Create default preferences if none exist
+      if (!prefs) {
+        prefs = await storage.createUserPreferences({
+          userId,
+          temperatureUnit: 'C',
+          emailAlertsEnabled: false,
+        });
+      }
+      
+      res.json(prefs);
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  app.patch('/api/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const updates = insertUserPreferencesSchema.partial().parse(req.body);
+      
+      const updatedPrefs = await storage.updateUserPreferences(userId, updates);
+      res.json(updatedPrefs);
+    } catch (error) {
+      console.error("Error updating preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Saved locations routes
+  app.get('/api/saved-locations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const locations = await storage.getSavedLocations(userId);
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching saved locations:", error);
+      res.status(500).json({ message: "Failed to fetch saved locations" });
+    }
+  });
+
+  app.post('/api/saved-locations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const locationData = insertSavedLocationSchema.parse({ ...req.body, userId });
+      
+      const savedLocation = await storage.addSavedLocation(locationData);
+      res.json(savedLocation);
+    } catch (error) {
+      console.error("Error adding saved location:", error);
+      res.status(500).json({ message: "Failed to add saved location" });
+    }
+  });
+
+  app.delete('/api/saved-locations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const locationId = parseInt(req.params.id);
+      
+      await storage.removeSavedLocation(locationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing saved location:", error);
+      res.status(500).json({ message: "Failed to remove saved location" });
+    }
+  });
+
+  app.patch('/api/saved-locations/:id/default', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const locationId = parseInt(req.params.id);
+      
+      await storage.setDefaultLocation(locationId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error setting default location:", error);
+      res.status(500).json({ message: "Failed to set default location" });
+    }
+  });
+
+  // Weather history routes
+  app.get('/api/weather-history', async (req, res) => {
+    try {
+      const lat = parseFloat(req.query.latitude as string);
+      const lon = parseFloat(req.query.longitude as string);
+      const days = parseInt(req.query.days as string) || 7;
+      
+      if (isNaN(lat) || isNaN(lon)) {
+        return res.status(400).json({ error: "Invalid coordinates" });
+      }
+      
+      const history = await storage.getWeatherHistory(lat, lon, days);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching weather history:", error);
+      res.status(500).json({ message: "Failed to fetch weather history" });
+    }
+  });
+
+  // Public routes (no auth required)
   app.get("/api/geocoding/search", async (req, res) => {
     try {
       const query = req.query.q as string;
