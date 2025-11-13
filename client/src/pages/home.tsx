@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, X, LogIn } from "lucide-react";
@@ -31,6 +33,17 @@ export default function Home() {
   const searchRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
   const { unit: temperatureUnit } = useTemperatureUnit();
+  const [_, setLocation] = useLocation();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/logout", {});
+      return response.json();
+    },
+    onSuccess: () => {
+      setLocation("/login");
+    },
+  });
 
   const { data: suggestions, isLoading: searchLoading } = useQuery<Location[]>({
     queryKey: [`/api/geocoding/search?q=${encodeURIComponent(searchQuery)}`],
@@ -290,7 +303,8 @@ export default function Home() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => window.location.href = '/api/auth/logout'}
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
                     data-testid="button-logout"
                     aria-label="Log out"
                   >

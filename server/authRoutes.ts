@@ -53,39 +53,25 @@ router.post("/register", authRateLimiter, async (req, res) => {
     // Hash password
     const hashedPassword = await hashPassword(data.password);
 
-    // Generate email verification token
-    const verificationToken = nanoid(32);
-
-    // Create user
+    // Create user (email verification disabled for development)
     const user = await storage.createUser({
       email: data.email,
       password: hashedPassword,
       firstName: data.firstName,
       lastName: data.lastName,
-      emailVerified: false,
-      emailVerificationToken: verificationToken,
+      emailVerified: true,
+      emailVerificationToken: null,
     });
 
-    // TODO: Send verification email
-    // await sendVerificationEmail(user.email, verificationToken);
-
-    // For development, return the verification token (remove in production)
-    const response = {
-      message: "Registration successful. Please check your email to verify your account.",
+    res.status(201).json({
+      message: "Registration successful. You can now log in.",
       user: {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
       },
-    };
-
-    // In development, include verification link
-    if (process.env.NODE_ENV !== "production") {
-      (response as any).verificationUrl = `/api/auth/verify-email/${verificationToken}`;
-    }
-
-    res.status(201).json(response);
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
@@ -119,13 +105,6 @@ router.post("/login", loginRateLimiter, (req, res, next) => {
     if (!user) {
       return res.status(401).json({ 
         message: info?.message || "Invalid credentials" 
-      });
-    }
-
-    // Double-check email verification (defense in depth)
-    if (!user.emailVerified) {
-      return res.status(401).json({ 
-        message: "Please verify your email before logging in" 
       });
     }
 
