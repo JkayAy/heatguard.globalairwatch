@@ -133,9 +133,21 @@ export const hourlyForecastSchema = z.object({
   riskLevel: heatRiskLevel,
 });
 
+export const dailyForecastSchema = z.object({
+  date: z.string(),
+  temperatureMax: z.number(),
+  temperatureMin: z.number(),
+  heatIndexMax: z.number(),
+  heatIndexMin: z.number(),
+  riskLevel: heatRiskLevel,
+  precipitationProbability: z.number(),
+  windSpeedMax: z.number(),
+});
+
 export const weatherDataSchema = z.object({
   current: currentWeatherSchema,
   hourly: z.array(hourlyForecastSchema),
+  daily: z.array(dailyForecastSchema),
   location: locationSchema,
   heatIndex: z.number(),
   riskLevel: heatRiskLevel,
@@ -144,6 +156,7 @@ export const weatherDataSchema = z.object({
 export type Location = z.infer<typeof locationSchema>;
 export type CurrentWeather = z.infer<typeof currentWeatherSchema>;
 export type HourlyForecast = z.infer<typeof hourlyForecastSchema>;
+export type DailyForecast = z.infer<typeof dailyForecastSchema>;
 export type HeatRiskLevel = z.infer<typeof heatRiskLevel>;
 export type WeatherData = z.infer<typeof weatherDataSchema>;
 

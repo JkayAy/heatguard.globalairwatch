@@ -297,9 +297,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             longitude: lon,
             current: "temperature_2m,relative_humidity_2m,apparent_temperature",
             hourly: "temperature_2m,relative_humidity_2m,apparent_temperature",
+            daily: "temperature_2m_max,temperature_2m_min,relative_humidity_2m_max,relative_humidity_2m_min,precipitation_probability_max,wind_speed_10m_max",
             temperature_unit: "celsius",
+            wind_speed_unit: "kmh",
             timezone: "auto",
-            forecast_days: 1,
+            forecast_days: 7,
           },
         }
       );
@@ -354,6 +356,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
 
+      // Process daily forecast data
+      const dailyForecasts = data.daily?.time?.map((date: string, index: number) => {
+        const tempMaxC = data.daily.temperature_2m_max[index];
+        const tempMinC = data.daily.temperature_2m_min[index];
+        const humidityMax = data.daily.relative_humidity_2m_max[index];
+        const humidityMin = data.daily.relative_humidity_2m_min[index];
+        
+        // Calculate heat index for max temperature (convert to F first, then calculate, then back to C)
+        const tempMaxF = celsiusToFahrenheit(tempMaxC);
+        const heatIndexMaxF = calculateHeatIndex(tempMaxF, humidityMax);
+        const heatIndexMaxC = fahrenheitToCelsius(heatIndexMaxF);
+        
+        // Calculate heat index for min temperature (convert to F first, then calculate, then back to C)
+        const tempMinF = celsiusToFahrenheit(tempMinC);
+        const heatIndexMinF = calculateHeatIndex(tempMinF, humidityMin);
+        const heatIndexMinC = fahrenheitToCelsius(heatIndexMinF);
+        
+        // Use max heat index for daily risk level
+        const dailyRiskLevel = getHeatRiskLevel(heatIndexMaxF);
+
+        return {
+          date,
+          temperatureMax: tempMaxC,
+          temperatureMin: tempMinC,
+          heatIndexMax: heatIndexMaxC,
+          heatIndexMin: heatIndexMinC,
+          riskLevel: dailyRiskLevel,
+          precipitationProbability: data.daily.precipitation_probability_max[index] || 0,
+          windSpeedMax: data.daily.wind_speed_10m_max[index] || 0,
+        };
+      }) || [];
+
       const location: Location = {
         name: locationName,
         latitude: lat,
@@ -370,6 +404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           time: data.current.time,
         },
         hourly: hourlyForecasts,
+        daily: dailyForecasts,
         location,
         heatIndex,
         riskLevel,

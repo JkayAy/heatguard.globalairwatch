@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Search, MapPin, X, LogIn } from "lucide-react";
 import { WeatherCard } from "@/components/weather-card";
 import { HourlyForecastTimeline } from "@/components/hourly-forecast";
+import { DailyForecastCard } from "@/components/DailyForecastCard";
+import { RiskTrendVisualization } from "@/components/RiskTrendVisualization";
 import { HealthGuidance } from "@/components/health-guidance";
 import { ErrorDisplay } from "@/components/error-display";
 import { SettingsDialog } from "@/components/settings-dialog";
@@ -15,6 +17,7 @@ import {
   HealthGuidanceSkeleton,
 } from "@/components/loading-skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useTemperatureUnit } from "@/hooks/useTemperatureUnit";
 import type { Location, WeatherData } from "@shared/schema";
 
 export default function Home() {
@@ -24,6 +27,7 @@ export default function Home() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated } = useAuth();
+  const { unit: temperatureUnit } = useTemperatureUnit();
 
   const { data: suggestions, isLoading: searchLoading } = useQuery<Location[]>({
     queryKey: [`/api/geocoding/search?q=${encodeURIComponent(searchQuery)}`],
@@ -277,6 +281,27 @@ export default function Home() {
           <div className="space-y-6 md:space-y-8">
             <WeatherCard data={weatherData} />
             <HourlyForecastTimeline hourly={weatherData.hourly} />
+            
+            {weatherData.daily && weatherData.daily.length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold" data-testid="heading-7-day-forecast">
+                  7-Day Forecast
+                </h2>
+                
+                <RiskTrendVisualization dailyForecasts={weatherData.daily} />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {weatherData.daily.map((day) => (
+                    <DailyForecastCard
+                      key={day.date}
+                      forecast={day}
+                      temperatureUnit={temperatureUnit as "C" | "F"}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            
             <HealthGuidance riskLevel={weatherData.riskLevel} />
           </div>
         )}
