@@ -159,8 +159,22 @@ router.get("/verify-email/:token", async (req, res) => {
   try {
     const { token } = req.params;
 
+    // Validate token format and length (nanoid generates 32 chars)
+    if (!token || token.length !== 32 || !/^[A-Za-z0-9_-]+$/.test(token)) {
+      return res.status(400).json({ message: "Invalid verification token format" });
+    }
+
+    // Hash the token before looking it up (tokens are stored hashed)
+    let hashedToken: string;
+    try {
+      hashedToken = hashToken(token);
+    } catch (hashError) {
+      console.error("Token hashing error:", hashError);
+      return res.status(400).json({ message: "Invalid verification token" });
+    }
+
     // Find user with this verification token
-    const user = await storage.getUserByVerificationToken(token);
+    const user = await storage.getUserByVerificationToken(hashedToken);
     
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired verification token" });
@@ -251,8 +265,19 @@ router.post("/reset-password", passwordResetRateLimiter, async (req, res) => {
   try {
     const data = resetPasswordSchema.parse(req.body);
 
+    // Validate token format and length (nanoid generates 32 chars)
+    if (!data.token || data.token.length !== 32 || !/^[A-Za-z0-9_-]+$/.test(data.token)) {
+      return res.status(400).json({ message: "Invalid reset token format" });
+    }
+
     // Hash the provided token to compare with stored hash
-    const hashedToken = hashToken(data.token);
+    let hashedToken: string;
+    try {
+      hashedToken = hashToken(data.token);
+    } catch (hashError) {
+      console.error("Token hashing error:", hashError);
+      return res.status(400).json({ message: "Invalid reset token" });
+    }
 
     // Find user by hashed reset token
     const user = await storage.getUserByResetToken(hashedToken);
