@@ -70,7 +70,7 @@ export default function SignupPage() {
       setSuccess(true);
       toast({
         title: "Account created!",
-        description: "You can now log in to your account.",
+        description: "Please check your email to verify your account.",
       });
     },
     onError: (error: Error) => {
@@ -96,19 +96,25 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <CardTitle className="text-2xl font-bold" data-testid="text-success-title">
-                Account Created!
+                Check Your Email
               </CardTitle>
               <CardDescription data-testid="text-success-message">
-                Your account has been created successfully. You can now log in to start monitoring heat risks.
+                We've sent a verification link to your email address. Please click the link to verify your account before logging in.
               </CardDescription>
             </div>
           </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground text-center">
+              Didn't receive the email? Check your spam folder or try signing up again.
+            </p>
+          </CardContent>
           <CardFooter className="flex justify-center">
             <Button
               onClick={() => setLocation("/login")}
+              variant="outline"
               data-testid="button-go-to-login"
             >
-              Log In Now
+              Go to Login
             </Button>
           </CardFooter>
         </Card>

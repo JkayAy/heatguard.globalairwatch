@@ -6,6 +6,7 @@ import { hashPassword, comparePassword } from "./customAuth";
 import { hashToken } from "./utils/hashToken";
 import { loginRateLimiter, passwordResetRateLimiter, authRateLimiter } from "./middleware/rateLimiter";
 import passport from "passport";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./emails/emailService";
 
 const router = Router();
 
@@ -53,18 +54,37 @@ router.post("/register", authRateLimiter, async (req, res) => {
     // Hash password
     const hashedPassword = await hashPassword(data.password);
 
-    // Create user (email verification disabled for development)
+    // Generate email verification token
+    const verificationToken = nanoid(32);
+    const hashedVerificationToken = hashToken(verificationToken);
+
+    // Create user with email verification required
     const user = await storage.createUser({
       email: data.email,
       password: hashedPassword,
       firstName: data.firstName,
       lastName: data.lastName,
-      emailVerified: true,
-      emailVerificationToken: null,
+      emailVerified: false,
+      emailVerificationToken: hashedVerificationToken,
     });
 
+    // Send verification email
+    const host = req.get('host');
+    const baseUrl = host ? `${req.protocol}://${host}` : 'http://localhost:5000';
+    try {
+      await sendVerificationEmail(
+        user.email,
+        user.firstName || 'User',
+        verificationToken,
+        baseUrl
+      );
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Continue registration even if email fails
+    }
+
     res.status(201).json({
-      message: "Registration successful. You can now log in.",
+      message: "Registration successful. Please check your email to verify your account.",
       user: {
         id: user.id,
         email: user.email,
@@ -189,8 +209,20 @@ router.post("/forgot-password", passwordResetRateLimiter, async (req, res) => {
       passwordResetExpires: resetExpires,
     });
 
-    // TODO: Send password reset email
-    // await sendPasswordResetEmail(user.email, resetToken);
+    // Send password reset email
+    const host = req.get('host');
+    const baseUrl = host ? `${req.protocol}://${host}` : 'http://localhost:5000';
+    try {
+      await sendPasswordResetEmail(
+        user.email,
+        user.firstName || 'User',
+        resetToken,
+        baseUrl
+      );
+    } catch (emailError) {
+      console.error("Failed to send password reset email:", emailError);
+      // Continue even if email fails
+    }
 
     const response = {
       message: "If an account exists with that email, a password reset link has been sent.",
