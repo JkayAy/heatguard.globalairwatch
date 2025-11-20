@@ -328,42 +328,51 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-8">
-          {isAuthenticated ? (
-            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 md:gap-8">
-              <aside className="space-y-6">
+        {isAuthenticated ? (
+          <div className="flex min-h-[calc(100vh-65px)]">
+            {/* Sidebar */}
+            <aside className="w-80 border-r bg-muted/30 overflow-y-auto">
+              <div className="p-6 sticky top-0">
                 <SavedLocations onLocationSelect={handleSelectLocation} />
-              </aside>
-              
-              <div className="space-y-6 md:space-y-8">
-                <div className="text-center space-y-2">
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+              </div>
+            </aside>
+            
+            {/* Main Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 space-y-8">
+                {/* Page Header */}
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-bold tracking-tight text-foreground">
                     Check Heat Risk
                   </h2>
-                  <p className="text-base text-muted-foreground">
+                  <p className="text-muted-foreground">
                     Search for any location to see heat safety information
                   </p>
                 </div>
-                {renderSearchAndWeatherContent()}
+                
+                {/* Search Section */}
+                <div className="max-w-2xl">
+                  {renderSearchAndWeatherContent()}
+                </div>
               </div>
             </div>
-          ) : (
-            <>
-              {!selectedLocation && !weatherLoading && !weatherData && (
-                <HeroSection
-                  onSearchClick={() => {
-                    const searchInput = document.querySelector('[data-testid="input-search"]') as HTMLInputElement;
-                    searchInput?.focus();
-                  }}
-                  onLocationClick={handleUseMyLocation}
-                />
-              )}
-              <div className="max-w-3xl mx-auto space-y-6 py-8">
-                {renderSearchAndWeatherContent()}
-              </div>
-            </>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-8">
+            {!selectedLocation && !weatherLoading && !weatherData && (
+              <HeroSection
+                onSearchClick={() => {
+                  const searchInput = document.querySelector('[data-testid="input-search"]') as HTMLInputElement;
+                  searchInput?.focus();
+                }}
+                onLocationClick={handleUseMyLocation}
+              />
+            )}
+            <div className="max-w-3xl mx-auto space-y-6 py-8">
+              {renderSearchAndWeatherContent()}
+            </div>
+          </div>
+        )}
       </main>
       
       <Footer />

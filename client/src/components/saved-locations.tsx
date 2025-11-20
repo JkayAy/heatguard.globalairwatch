@@ -73,41 +73,41 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
 
   if (isLoading) {
     return (
-      <Card className="p-4">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-lg font-semibold">Saved Locations</h2>
         </div>
         <p className="text-sm text-muted-foreground">Loading...</p>
-      </Card>
+      </div>
     );
   }
 
   if (!savedLocations || savedLocations.length === 0) {
     return (
-      <Card className="p-4">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
           <MapPin className="h-5 w-5 text-muted-foreground" />
           <h2 className="text-lg font-semibold">Saved Locations</h2>
         </div>
         <p className="text-sm text-muted-foreground">
           No saved locations yet. Search for a location and save it to see it here.
         </p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
         <MapPin className="h-5 w-5 text-muted-foreground" />
         <h2 className="text-lg font-semibold">Saved Locations</h2>
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1">
         {savedLocations.map((location) => (
           <div
             key={location.id}
-            className="flex items-center gap-2 p-3 rounded-lg hover-elevate active-elevate-2 transition-colors"
+            className="group flex items-center gap-2 p-2 rounded-md hover-elevate active-elevate-2 transition-colors"
             data-testid={`saved-location-${location.id}`}
           >
             <button
@@ -120,66 +120,70 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
                   admin1: location.admin1 ?? "",
                 })
               }
-              className="flex-1 text-left"
+              className="flex-1 text-left min-w-0"
               data-testid={`button-select-location-${location.id}`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-start gap-2 min-w-0">
                 {location.isDefault && (
-                  <Star className="h-4 w-4 fill-primary text-primary" />
+                  <Star className="h-4 w-4 fill-primary text-primary shrink-0 mt-0.5" />
                 )}
-                <div>
-                  <p className="font-medium text-foreground">{location.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground truncate">{location.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {location.admin1 && `${location.admin1}, `}
                     {location.country}
                   </p>
                 </div>
               </div>
             </button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDefaultMutation.mutate(location.id)}
-              disabled={location.isDefault || setDefaultMutation.isPending}
-              data-testid={`button-set-default-${location.id}`}
-              aria-label="Set as default"
-            >
-              <Star className={`h-4 w-4 ${location.isDefault ? 'fill-primary text-primary' : ''}`} />
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  disabled={deleteMutation.isPending}
-                  data-testid={`button-delete-location-${location.id}`}
-                  aria-label="Remove location"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Remove Location</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to remove "{location.name}" from your saved locations?
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => deleteMutation.mutate(location.id)}
-                    data-testid={`confirm-delete-${location.id}`}
+            <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setDefaultMutation.mutate(location.id)}
+                disabled={location.isDefault || setDefaultMutation.isPending}
+                data-testid={`button-set-default-${location.id}`}
+                aria-label="Set as default"
+              >
+                <Star className={`h-3.5 w-3.5 ${location.isDefault ? 'fill-primary text-primary' : ''}`} />
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={deleteMutation.isPending}
+                    data-testid={`button-delete-location-${location.id}`}
+                    aria-label="Remove location"
                   >
-                    Remove
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove Location</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to remove "{location.name}" from your saved locations?
+                      This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => deleteMutation.mutate(location.id)}
+                      data-testid={`confirm-delete-${location.id}`}
+                    >
+                      Remove
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 }
