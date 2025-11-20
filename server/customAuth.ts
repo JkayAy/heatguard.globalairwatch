@@ -71,9 +71,10 @@ export async function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
-          if (!user.emailVerified) {
-            return done(null, false, { message: "Please verify your email before logging in" });
-          }
+          // Email verification is disabled - users can log in immediately after signup
+          // if (!user.emailVerified) {
+          //   return done(null, false, { message: "Please verify your email before logging in" });
+          // }
 
           return done(null, user);
         } catch (error) {
