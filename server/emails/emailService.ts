@@ -11,7 +11,7 @@ export interface SendEmailOptions {
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
   try {
-    const { to, subject, html, from = 'Heat Risk Alert <onboarding@resend.dev>' } = options;
+    const { to, subject, html, from = 'Heat Risk Alert <alerts@send.heatguard>' } = options;
 
     const { data, error } = await resend.emails.send({
       from,
