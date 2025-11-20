@@ -19,6 +19,9 @@ export function Footer() {
         <div className="pt-6 border-t space-y-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-sm">
             <div className="flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground/80" data-testid="text-disclaimer">
+                This application is provided for educational, informational, and research purposes only. Not for commercial use.
+              </p>
               <p className="text-muted-foreground" data-testid="text-copyright">
                 © {new Date().getFullYear()} James Ayodele Kolawole. All rights reserved.
               </p>
