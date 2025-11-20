@@ -109,10 +109,10 @@ Preferred communication style: Simple, everyday language.
 **Authentication:**
 - Custom email/password authentication using passport-local strategy
 - Bcrypt password hashing (10 salt rounds) for secure credential storage
-- SHA-256 token hashing for password reset tokens
+- SHA-256 token hashing for email verification and password reset tokens
 - Session storage in PostgreSQL with connect-pg-simple and 7-day TTL
 - Rate limiting on authentication endpoints (5-15 requests per 15 minutes)
-- Email verification disabled (users can log in immediately after signup)
+- Email verification REQUIRED before login (users must verify email via Resend before accessing app)
 - Secure password reset flow with token expiration (1 hour)
 - Session invalidation on password change for security
 - Protected routes require valid authentication
