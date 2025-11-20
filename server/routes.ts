@@ -1,10 +1,9 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import { getAuth } from "@clerk/express";
 import axios from "axios";
 import { apiCache } from "./cache";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./customAuth";
-import authRoutes from "./authRoutes";
 import {
   locationSchema,
   geocodingResponseSchema,
@@ -81,17 +80,24 @@ function getAqiLevel(aqi: number): AqiLevel {
   return "hazardous";
 }
 
+// Middleware to require authentication
+function requireAuth(req: Request, res: Response, next: Function) {
+  const { userId } = getAuth(req);
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication middleware
-  await setupAuth(app);
-
-  // Mount auth routes
-  app.use("/api/auth", authRoutes);
-
   // User preferences routes
-  app.get('/api/preferences', isAuthenticated, async (req: any, res) => {
+  app.get('/api/preferences', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       let prefs = await storage.getUserPreferences(userId);
       
       // Create default preferences if none exist
@@ -110,9 +116,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/preferences', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/preferences', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const updates = insertUserPreferencesSchema.partial().parse(req.body);
       
       const updatedPrefs = await storage.updateUserPreferences(userId, updates);
@@ -124,9 +134,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Saved locations routes
-  app.get('/api/saved-locations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/saved-locations', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const locations = await storage.getSavedLocations(userId);
       res.json(locations);
     } catch (error) {
@@ -135,9 +149,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/saved-locations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/saved-locations', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const locationData = insertSavedLocationSchema.parse({ ...req.body, userId });
       
       const savedLocation = await storage.addSavedLocation(locationData);
@@ -148,9 +166,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/saved-locations/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/saved-locations/:id', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const locationId = parseInt(req.params.id);
       
       await storage.removeSavedLocation(locationId, userId);
@@ -161,9 +183,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/saved-locations/:id/default', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/saved-locations/:id/default', requireAuth, async (req: Request, res) => {
     try {
-      const userId = req.user.id;
+      const { userId } = getAuth(req);
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const locationId = parseInt(req.params.id);
       
       await storage.setDefaultLocation(locationId, userId);

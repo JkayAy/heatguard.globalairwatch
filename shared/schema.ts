@@ -12,37 +12,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
-// Session storage table (required for Replit Auth)
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// User storage table
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique().notNull(),
-  password: varchar("password"),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  emailVerified: boolean("email_verified").notNull().default(false),
-  emailVerificationToken: varchar("email_verification_token"),
-  passwordResetToken: varchar("password_reset_token"),
-  passwordResetExpires: timestamp("password_reset_expires"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-// User preferences table
+// User preferences table (userId is Clerk user ID)
 export const userPreferences = pgTable("user_preferences", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull(), // Clerk user ID
   temperatureUnit: varchar("temperature_unit", { length: 1 }).notNull().default("C"), // 'C' or 'F'
   emailAlertsEnabled: boolean("email_alerts_enabled").notNull().default(false),
   alertEmail: varchar("alert_email"),
@@ -50,10 +23,10 @@ export const userPreferences = pgTable("user_preferences", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Saved locations table
+// Saved locations table (userId is Clerk user ID)
 export const savedLocations = pgTable("saved_locations", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull(), // Clerk user ID
   name: varchar("name").notNull(),
   latitude: real("latitude").notNull(),
   longitude: real("longitude").notNull(),
@@ -80,8 +53,6 @@ export const weatherHistory = pgTable("weather_history", {
   index("idx_weather_history_recorded_at").on(table.recordedAt),
 ]);
 
-export type UpsertUser = typeof users.$inferInsert;
-export type User = typeof users.$inferSelect;
 export type InsertUserPreferences = typeof userPreferences.$inferInsert;
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertSavedLocation = typeof savedLocations.$inferInsert;

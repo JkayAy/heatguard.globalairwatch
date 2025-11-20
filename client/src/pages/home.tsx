@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, X, LogIn } from "lucide-react";
+import { Search, MapPin, X } from "lucide-react";
 import { WeatherCard } from "@/components/weather-card";
 import { HourlyForecastTimeline } from "@/components/hourly-forecast";
 import { DailyForecastCard } from "@/components/DailyForecastCard";
@@ -21,7 +20,6 @@ import {
   HourlyForecastSkeleton,
   HealthGuidanceSkeleton,
 } from "@/components/loading-skeleton";
-import { useAuth } from "@/hooks/useAuth";
 import { useTemperatureUnit } from "@/hooks/useTemperatureUnit";
 import type { Location, WeatherData } from "@shared/schema";
 
@@ -31,20 +29,7 @@ export default function Home() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated } = useAuth();
   const { unit: temperatureUnit } = useTemperatureUnit();
-  const [_, setLocation] = useLocation();
-
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/auth/logout", {});
-      return response.json();
-    },
-    onSuccess: () => {
-      setLocation("/");
-      window.location.reload();
-    },
-  });
 
   const { data: suggestions, isLoading: searchLoading } = useQuery<Location[]>({
     queryKey: [`/api/geocoding/search?q=${encodeURIComponent(searchQuery)}`],
@@ -298,37 +283,27 @@ export default function Home() {
               </h1>
             </div>
             <div className="flex gap-2">
-              {isAuthenticated ? (
-                <>
-                  <SettingsDialog />
+              <SignedIn>
+                <SettingsDialog />
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
                   <Button
                     variant="ghost"
-                    size="icon"
-                    onClick={() => logoutMutation.mutate()}
-                    disabled={logoutMutation.isPending}
-                    data-testid="button-logout"
-                    aria-label="Log out"
+                    data-testid="button-login"
                   >
-                    <LogIn className="h-5 w-5" />
+                    Log In
                   </Button>
-                </>
-              ) : (
-                <Button
-                  variant="ghost"
-                  onClick={() => setLocation('/login')}
-                  data-testid="button-login"
-                >
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Log In
-                </Button>
-              )}
+                </SignInButton>
+              </SignedOut>
             </div>
           </div>
         </div>
       </header>
 
       <main className="flex-1">
-        {isAuthenticated ? (
+        <SignedIn>
           <div className="flex min-h-[calc(100vh-65px)]">
             {/* Sidebar */}
             <aside className="w-80 border-r bg-muted/30 overflow-y-auto">
@@ -357,7 +332,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-        ) : (
+        </SignedIn>
+        
+        <SignedOut>
           <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-8">
             {!selectedLocation && !weatherLoading && !weatherData && (
               <HeroSection
@@ -372,7 +349,7 @@ export default function Home() {
               {renderSearchAndWeatherContent()}
             </div>
           </div>
-        )}
+        </SignedOut>
       </main>
       
       <Footer />

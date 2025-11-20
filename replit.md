@@ -40,7 +40,8 @@ Preferred communication style: Simple, everyday language.
 **State Management:**
 - React Query for asynchronous data fetching and caching (10-minute stale time for weather data)
 - Local React state for UI interactions (search, dropdowns, mobile menu)
-- Custom hooks for reusable logic (useAuth, usePreferences, useTemperatureUnit, use-mobile, use-toast)
+- Custom hooks for reusable logic (usePreferences, useTemperatureUnit, use-mobile, use-toast)
+- Clerk's useAuth, useUser hooks for authentication state
 - Temperature unit preference dynamically applied across all displays
 
 **Component Structure:**
@@ -57,16 +58,8 @@ Preferred communication style: Simple, everyday language.
 
 **API Design:**
 - RESTful endpoints for geocoding and weather data
-- Custom authentication system using passport-local
+- Clerk authentication for user management
 - Route structure:
-  - `/api/auth/signup` - Create new user account (public)
-  - `/api/auth/login` - Authenticate user with email/password (public)
-  - `/api/auth/logout` - Destroy session (authenticated)
-  - `/api/auth/user` - Get current authenticated user (protected)
-  - `/api/auth/forgot-password` - Request password reset email (public)
-  - `/api/auth/reset-password` - Reset password with token (public)
-  - `/api/auth/verify-email` - Verify email address with token (public)
-  - `/api/auth/resend-verification` - Resend verification email (authenticated)
   - `/api/preferences` - Get/update user preferences (protected)
   - `/api/saved-locations` - CRUD for saved locations (protected)
   - `/api/weather-history` - Get historical weather data (public)
@@ -107,30 +100,30 @@ Preferred communication style: Simple, everyday language.
 - Auth callback URLs dynamically generated from request protocol and host
 
 **Authentication:**
-- Custom email/password authentication using passport-local strategy
-- Bcrypt password hashing (10 salt rounds) for secure credential storage
-- SHA-256 token hashing for email verification and password reset tokens
-- Session storage in PostgreSQL with connect-pg-simple and 7-day TTL
-- Rate limiting on authentication endpoints (5-15 requests per 15 minutes)
-- Email verification REQUIRED before login (users must verify email via Resend before accessing app)
-- Secure password reset flow with token expiration (1 hour)
-- Session invalidation on password change for security
-- Protected routes require valid authentication
-- Production-ready security measures (HTTPS in production, secure cookies)
-- Seamless navigation: logout redirects to home, all auth pages have "Back to Home" links
+- Clerk authentication platform for comprehensive user management
+- Features include:
+  - Pre-built authentication UI components (SignInButton, UserButton)
+  - Email/password, OAuth (Google, GitHub, etc.), magic links
+  - Multi-factor authentication (MFA)
+  - User profile management with profile pictures
+  - Session management with secure JWT tokens
+  - Automatic token refresh every 50 seconds
+- Frontend integration via @clerk/clerk-react with ClerkProvider
+- Backend integration via @clerk/express with getAuth() middleware
+- Protected routes use requireAuth middleware to verify Clerk user IDs
+- Development mode with test keys for local development
+- Production-ready with automatic security updates and compliance
 
 ### Data Storage
 
 **Current Implementation:**
 - PostgreSQL database via Neon serverless driver with DatabaseStorage class
-- Full user authentication and session management
-- Persistent user preferences and saved locations
+- Clerk manages user authentication and profiles (no local user table needed)
+- Persistent user preferences and saved locations linked to Clerk user IDs
 
 **Database Schema:**
-- **users**: User accounts with bcrypt-hashed passwords (id, email, firstName, lastName, passwordHash, isVerified, verificationToken, resetToken)
-- **sessions**: Express session storage (sid, sess, expire) managed by connect-pg-simple
-- **user_preferences**: User settings (temperatureUnit: C|F, emailAlertsEnabled, alertEmail)
-- **saved_locations**: User's saved locations with default flag and user relationship
+- **user_preferences**: User settings (userId: Clerk ID, temperatureUnit: C|F, emailAlertsEnabled, alertEmail)
+- **saved_locations**: User's saved locations with default flag (userId: Clerk ID)
 - **weather_history**: Historical weather records with location and risk data
 
 **Database Configuration:**
