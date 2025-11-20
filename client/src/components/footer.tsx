@@ -16,11 +16,32 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-6 border-t">
+        <div className="pt-6 border-t space-y-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-sm">
-            <p className="text-muted-foreground" data-testid="text-copyright">
-              © {new Date().getFullYear()} Heat Risk Alert. All rights reserved.
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="text-muted-foreground" data-testid="text-copyright">
+                © {new Date().getFullYear()} James Ayodele Kolawole. All rights reserved.
+              </p>
+              <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
+                <a
+                  href="https://ayokolawole.co.uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground hover:underline"
+                  data-testid="link-developer-website"
+                >
+                  ayokolawole.co.uk
+                </a>
+                <span className="text-muted-foreground/40">•</span>
+                <a
+                  href="mailto:info@ayokolawole.co.uk"
+                  className="text-foreground hover:underline"
+                  data-testid="link-developer-email"
+                >
+                  info@ayokolawole.co.uk
+                </a>
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 text-muted-foreground">
               <p data-testid="text-attribution-openmeteo">
                 Weather data:{" "}
