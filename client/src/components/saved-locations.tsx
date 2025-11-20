@@ -1,5 +1,4 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Star, Trash2 } from "lucide-react";
 import type { SavedLocation, Location } from "@shared/schema";
@@ -103,14 +102,17 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
         <MapPin className="h-5 w-5 text-muted-foreground" />
         <h2 className="text-lg font-semibold">Saved Locations</h2>
       </div>
-      <div className="space-y-1">
+      <ul className="space-y-1" role="list">
         {savedLocations.map((location) => (
-          <div
+          <li
             key={location.id}
+            role="group"
+            aria-label={`${location.name} - ${location.admin1 ? location.admin1 + ', ' : ''}${location.country}${location.isDefault ? ' (default)' : ''}`}
             className="group flex items-center gap-2 p-2 rounded-md hover-elevate active-elevate-2 transition-colors"
             data-testid={`saved-location-${location.id}`}
           >
             <button
+              type="button"
               onClick={() =>
                 onLocationSelect({
                   name: location.name,
@@ -122,10 +124,11 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
               }
               className="flex-1 text-left min-w-0"
               data-testid={`button-select-location-${location.id}`}
+              aria-label={`Select ${location.name}`}
             >
               <div className="flex items-start gap-2 min-w-0">
                 {location.isDefault && (
-                  <Star className="h-4 w-4 fill-primary text-primary shrink-0 mt-0.5" />
+                  <Star className="h-4 w-4 fill-primary text-primary shrink-0 mt-0.5" aria-hidden="true" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-foreground truncate">{location.name}</p>
@@ -136,27 +139,33 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
                 </div>
               </div>
             </button>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0" role="group" aria-label="Actions">
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => setDefaultMutation.mutate(location.id)}
-                disabled={location.isDefault || setDefaultMutation.isPending}
+                onClick={() => {
+                  if (!location.isDefault && !setDefaultMutation.isPending) {
+                    setDefaultMutation.mutate(location.id);
+                  }
+                }}
+                aria-pressed={location.isDefault}
+                aria-label={location.isDefault ? "Default location" : "Set as default location"}
                 data-testid={`button-set-default-${location.id}`}
-                aria-label="Set as default"
               >
                 <Star className={`h-3.5 w-3.5 ${location.isDefault ? 'fill-primary text-primary' : ''}`} />
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
                     disabled={deleteMutation.isPending}
                     data-testid={`button-delete-location-${location.id}`}
-                    aria-label="Remove location"
+                    aria-label={`Remove ${location.name}`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -181,9 +190,9 @@ export function SavedLocations({ onLocationSelect }: SavedLocationsProps) {
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
