@@ -123,7 +123,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      const updates = insertUserPreferencesSchema.partial().parse(req.body);
+      // Exclude userId from updates to prevent hijacking other users' preferences
+      const updates = insertUserPreferencesSchema.omit({ userId: true }).partial().parse(req.body);
       
       const updatedPrefs = await storage.updateUserPreferences(userId, updates);
       res.json(updatedPrefs);
