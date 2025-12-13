@@ -179,3 +179,35 @@ Preferred communication style: Simple, everyday language.
 - Development: tsx for TypeScript execution with watch mode
 - Production: Vite for frontend bundling, ESBuild for backend bundling
 - Target: ESM format with Node.js platform for server code
+
+## Troubleshooting
+
+### Publishing Database Migration Errors
+
+If you encounter errors like "constraint does not exist" during publishing, this means the production database has a different state than the development database. To fix:
+
+1. **Use the Database Pane**: Access your production database through Replit's Database pane
+2. **Run cleanup SQL** (in production database):
+   ```sql
+   -- Remove any stale foreign key constraints
+   ALTER TABLE user_preferences DROP CONSTRAINT IF EXISTS user_preferences_user_id_users_id_fk;
+   ALTER TABLE saved_locations DROP CONSTRAINT IF EXISTS saved_locations_user_id_users_id_fk;
+   
+   -- Remove old tables if they exist
+   DROP TABLE IF EXISTS sessions CASCADE;
+   DROP TABLE IF EXISTS users CASCADE;
+   ```
+3. **Republish** after clearing the stale state
+
+### Development Database Sync
+
+To sync your development database with the schema:
+```bash
+npm run db:push -- --force
+```
+
+### Clerk Authentication
+
+- **Development Keys**: Use `pk_test_...` and `sk_test_...` keys for local development
+- **Production Keys**: Use `pk_live_...` and `sk_live_...` keys with proper domain configuration
+- If using a custom domain in Clerk, ensure DNS is properly configured before publishing
