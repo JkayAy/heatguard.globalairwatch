@@ -4,3 +4,32 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+.cache
+*.tsbuildinfo
+
+# OS files
+Thumbs.db
+
+# Replit specific (not needed for local development)
+.replit
+replit.md
+.cache/replit
+server/replitAuth.ts
