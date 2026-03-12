@@ -13,7 +13,7 @@ import {
   type AqiLevel,
   insertUserPreferencesSchema,
   insertSavedLocationSchema,
-} from "@shared/schema";
+} from "../shared/schema";
 
 const MAX_SAVED_LOCATIONS = 50;
 const AXIOS_TIMEOUT_MS = 10000;
