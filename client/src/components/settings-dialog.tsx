@@ -148,40 +148,13 @@ export function SettingsDialog() {
 
           {/* Email Alerts */}
           <div className="space-y-3">
-            <Label className="text-base font-semibold">Email Alerts</Label>
             <div className="flex items-center justify-between">
-              <Label htmlFor="email-alerts" className="font-normal">
-                Receive heat risk warnings via email
-              </Label>
-              <Switch
-                id="email-alerts"
-                checked={preferences?.emailAlertsEnabled || false}
-                onCheckedChange={handleEmailAlertsToggle}
-                disabled={isDisabled}
-                data-testid="switch-email-alerts"
-              />
+              <Label className="text-base font-semibold">Email Alerts</Label>
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">Coming Soon</span>
             </div>
-
-            {preferences?.emailAlertsEnabled && (
-              <div className="space-y-2">
-                <Label htmlFor="alert-email" className="text-sm">
-                  Alert Email Address
-                </Label>
-                <Input
-                  id="alert-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  defaultValue={preferences?.alertEmail || ""}
-                  onBlur={(e) => {
-                    if (e.target.value !== preferences?.alertEmail) {
-                      handleAlertEmailChange(e.target.value);
-                    }
-                  }}
-                  disabled={isDisabled}
-                  data-testid="input-alert-email"
-                />
-              </div>
-            )}
+            <p className="text-sm text-muted-foreground">
+              Email notifications for heat risk warnings are under development. Check back soon.
+            </p>
           </div>
         </div>
       </DialogContent>

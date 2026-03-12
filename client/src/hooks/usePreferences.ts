@@ -14,11 +14,7 @@ export function usePreferences() {
 
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<InsertUserPreferences>) => {
-      return await apiRequest("/api/preferences", {
-        method: "PATCH",
-        body: JSON.stringify(updates),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("PATCH", "/api/preferences", updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/preferences"] });

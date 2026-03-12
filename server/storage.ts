@@ -66,19 +66,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addSavedLocation(location: InsertSavedLocation): Promise<SavedLocation> {
-    // If setting as default, unset other defaults first
-    if (location.isDefault) {
-      await db
-        .update(savedLocations)
-        .set({ isDefault: false })
-        .where(eq(savedLocations.userId, location.userId));
-    }
-
-    const [saved] = await db
-      .insert(savedLocations)
-      .values(location)
-      .returning();
-    return saved;
+    return await db.transaction(async (tx) => {
+      if (location.isDefault) {
+        await tx.update(savedLocations).set({ isDefault: false }).where(eq(savedLocations.userId, location.userId));
+      }
+      const [saved] = await tx.insert(savedLocations).values(location).returning();
+      return saved;
+    });
   }
 
   async removeSavedLocation(id: number, userId: string): Promise<void> {
@@ -88,17 +82,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setDefaultLocation(id: number, userId: string): Promise<void> {
-    // Unset all defaults first
-    await db
-      .update(savedLocations)
-      .set({ isDefault: false })
-      .where(eq(savedLocations.userId, userId));
-
-    // Set the new default
-    await db
-      .update(savedLocations)
-      .set({ isDefault: true })
-      .where(and(eq(savedLocations.id, id), eq(savedLocations.userId, userId)));
+    await db.transaction(async (tx) => {
+      await tx.update(savedLocations).set({ isDefault: false }).where(eq(savedLocations.userId, userId));
+      await tx.update(savedLocations).set({ isDefault: true }).where(and(eq(savedLocations.id, id), eq(savedLocations.userId, userId)));
+    });
   }
 
   // Weather history operations

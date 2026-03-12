@@ -5,7 +5,7 @@ export function useTemperatureUnit() {
   const { preferences, isLoading } = usePreferences();
 
   // Default to Celsius for non-authenticated users
-  const unit = preferences?.temperatureUnit || "C";
+  const unit = (preferences?.temperatureUnit || "C") as "C" | "F";
 
   const format = (tempInCelsius: number, decimals: number = 0) => {
     return formatTemperature(tempInCelsius, unit, decimals);

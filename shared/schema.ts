@@ -9,6 +9,7 @@ import {
   real,
   boolean,
   serial,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -21,7 +22,9 @@ export const userPreferences = pgTable("user_preferences", {
   alertEmail: varchar("alert_email"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  unique("user_preferences_user_id_unique").on(table.userId),
+]);
 
 // Saved locations table (userId is Clerk user ID)
 export const savedLocations = pgTable("saved_locations", {

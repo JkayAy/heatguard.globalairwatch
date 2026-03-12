@@ -6,9 +6,26 @@ export default {
   theme: {
     extend: {
       borderRadius: {
-        lg: ".5625rem", /* 9px */
-        md: ".375rem", /* 6px */
-        sm: ".1875rem", /* 3px */
+        lg: "0.5rem",
+        md: "0.375rem",
+        sm: "0.25rem",
+        xl: "0.75rem",
+        "2xl": "1rem",
+        "3xl": "1.5rem",
+      },
+      boxShadow: {
+        "2xs": "var(--shadow-2xs)",
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        DEFAULT: "var(--shadow)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
+        "2xl": "var(--shadow-2xl)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["JetBrains Mono", "Fira Code", "monospace"],
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -82,22 +99,22 @@ export default {
           offline: "rgb(156 163 175)",
         },
         risk: {
-          normal: "hsl(200 70% 50%)",
+          normal: "hsl(152 76% 36%)",             /* emerald-600 */
           normalForeground: "hsl(0 0% 100%)",
-          caution: "hsl(45 95% 50%)",
-          cautionForeground: "hsl(45 90% 15%)",
-          extremeCaution: "hsl(30 95% 55%)",
+          caution: "hsl(38 92% 50%)",             /* amber-500 */
+          cautionForeground: "hsl(38 80% 15%)",
+          extremeCaution: "hsl(25 90% 55%)",      /* orange-500 */
           extremeCautionForeground: "hsl(0 0% 100%)",
-          danger: "hsl(10 90% 50%)",
+          danger: "hsl(0 84% 50%)",               /* red-500 */
           dangerForeground: "hsl(0 0% 100%)",
-          extremeDanger: "hsl(0 85% 40%)",
+          extremeDanger: "hsl(271 81% 46%)",      /* violet-700 */
           extremeDangerForeground: "hsl(0 0% 100%)",
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)"],
+        sans: ["Inter", "var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)"],
-        mono: ["var(--font-mono)"],
+        mono: ["JetBrains Mono", "var(--font-mono)", "monospace"],
       },
       keyframes: {
         "accordion-down": {

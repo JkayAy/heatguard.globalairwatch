@@ -2,66 +2,49 @@ import { Thermometer } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/30">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-12">
-        <div className="flex flex-col items-center text-center space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-center gap-2">
-              <Thermometer className="h-5 w-5 text-primary" data-testid="icon-footer-logo" />
-              <span className="text-base font-semibold text-foreground">Heat Risk Alert</span>
+    <footer className="border-t bg-card/50">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Brand */}
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Thermometer className="h-4 w-4 text-primary" data-testid="icon-footer-logo" />
             </div>
-            <p className="text-sm text-muted-foreground max-w-2xl">
-              Real-time heat risk monitoring and personalized safety guidance based on NOAA standards.
-            </p>
+            <div>
+              <span className="text-sm font-semibold text-foreground block leading-none">HeatGuard</span>
+              <span className="text-xs text-muted-foreground">Global Air Watch</span>
+            </div>
           </div>
 
-          <div className="w-full border-t pt-6 space-y-3">
-            <p className="text-xs text-muted-foreground/80" data-testid="text-disclaimer">
-              This application is provided for educational, informational, and research purposes only. Not for commercial use.
-            </p>
-            
-            <p className="text-sm text-muted-foreground" data-testid="text-copyright">
-              © {new Date().getFullYear()} James Ayodele Kolawole. All rights reserved.
-            </p>
-            
-            <p className="text-sm text-muted-foreground">
-              Designed by:{" "}
-              <a
-                href="https://ayokolawole.co.uk/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-foreground hover:underline"
-                data-testid="link-developer-website"
-              >
-                ayokolawole.co.uk
+          {/* Attribution */}
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground">
+            <span data-testid="text-attribution-openmeteo">
+              Weather:{" "}
+              <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-foreground transition-colors">
+                Open-Meteo
               </a>
-            </p>
+            </span>
+            <span className="opacity-30">·</span>
+            <span data-testid="text-attribution-noaa">
+              Heat index:{" "}
+              <a href="https://www.weather.gov/safety/heat-index" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-foreground transition-colors">
+                NOAA
+              </a>
+            </span>
+            <span className="opacity-30">·</span>
+            <a href="https://ayokolawole.co.uk/" target="_blank" rel="noopener noreferrer" className="text-foreground/70 hover:text-foreground transition-colors" data-testid="link-developer-website">
+              ayokolawole.co.uk
+            </a>
+          </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground pt-2">
-              <p data-testid="text-attribution-openmeteo">
-                Weather data:{" "}
-                <a
-                  href="https://open-meteo.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground hover:underline"
-                >
-                  Open-Meteo
-                </a>
-              </p>
-              <span className="text-muted-foreground/40">•</span>
-              <p data-testid="text-attribution-noaa">
-                Heat index:{" "}
-                <a
-                  href="https://www.weather.gov/safety/heat-index"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground hover:underline"
-                >
-                  NOAA standards
-                </a>
-              </p>
-            </div>
+          {/* Copyright + disclaimer */}
+          <div className="text-center md:text-right space-y-0.5">
+            <p className="text-xs text-muted-foreground" data-testid="text-copyright">
+              © {new Date().getFullYear()} James Ayodele Kolawole
+            </p>
+            <p className="text-xs text-muted-foreground/60" data-testid="text-disclaimer">
+              For informational purposes only
+            </p>
           </div>
         </div>
       </div>

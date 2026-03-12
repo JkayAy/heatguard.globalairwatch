@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import { useTheme } from "next-themes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, MapPin, X, Thermometer, Moon, Sun } from "lucide-react";
 import { WeatherCard } from "@/components/weather-card";
 import { HourlyForecastTimeline } from "@/components/hourly-forecast";
 import { DailyForecastCard } from "@/components/DailyForecastCard";
@@ -272,17 +273,38 @@ export default function Home() {
     </>
   );
 
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                Heat Risk Alert
-              </h1>
+      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Brand */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Thermometer className="h-4 w-4 text-primary" />
+              </div>
+              <div className="hidden sm:block">
+                <span className="text-sm font-bold text-foreground">HeatGuard</span>
+                <span className="text-xs text-muted-foreground ml-1.5">Global Air Watch</span>
+              </div>
             </div>
-            <div className="flex gap-2">
+
+            {/* Actions */}
+            <div className="flex items-center gap-1.5">
+              {/* Dark mode toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                aria-label="Toggle theme"
+                className="h-9 w-9"
+              >
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
+
               <SignedIn>
                 <SettingsDialog />
                 <UserButton afterSignOutUrl="/" />
@@ -290,10 +312,12 @@ export default function Home() {
               <SignedOut>
                 <SignInButton mode="modal">
                   <Button
-                    variant="ghost"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-sm"
                     data-testid="button-login"
                   >
-                    Log In
+                    Sign In
                   </Button>
                 </SignInButton>
               </SignedOut>
@@ -304,24 +328,27 @@ export default function Home() {
 
       <main className="flex-1">
         <SignedIn>
-          <div className="flex min-h-[calc(100vh-65px)]">
+          <div className="flex min-h-[calc(100vh-57px)]">
             {/* Sidebar */}
-            <aside className="w-80 border-r bg-muted/30 overflow-y-auto">
-              <div className="p-6 sticky top-0">
+            <aside className="w-72 shrink-0 border-r bg-sidebar hidden md:flex flex-col">
+              <div className="p-5 border-b">
+                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Saved Locations</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
                 <SavedLocations onLocationSelect={handleSelectLocation} />
               </div>
             </aside>
-            
+
             {/* Main Content */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 space-y-8">
+            <div className="flex-1 overflow-y-auto min-w-0">
+              <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-8">
                 {/* Page Header */}
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                    Check Heat Risk
+                  <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                    Heat Risk Monitor
                   </h2>
-                  <p className="text-muted-foreground">
-                    Search for any location to see heat safety information
+                  <p className="text-sm text-muted-foreground">
+                    Search any location for real-time heat safety data
                   </p>
                 </div>
                 
