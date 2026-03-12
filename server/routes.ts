@@ -1,5 +1,4 @@
 import type { Express, Request, Response } from "express";
-import { createServer, type Server } from "http";
 import { getAuth } from "@clerk/express";
 import axios from "axios";
 import { apiCache } from "./cache";
@@ -94,7 +93,7 @@ function requireAuth(req: Request, res: Response, next: Function) {
   next();
 }
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export function registerRoutes(app: Express): void {
   // --- User preferences ---
   app.get("/api/preferences", requireAuth, async (req: Request, res) => {
     try {
@@ -388,6 +387,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
 }
