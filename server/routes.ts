@@ -265,21 +265,29 @@ export function registerRoutes(app: Express): void {
       const cached = apiCache.get<WeatherData>(cacheKey);
       if (cached) return res.json(cached);
 
-      const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
-        params: {
-          latitude: lat, longitude: lon,
-          current: "temperature_2m,relative_humidity_2m,apparent_temperature",
-          hourly: "temperature_2m,relative_humidity_2m,apparent_temperature",
-          daily: "temperature_2m_max,temperature_2m_min,relative_humidity_2m_max,relative_humidity_2m_min,precipitation_probability_max,wind_speed_10m_max",
-          temperature_unit: "celsius",
-          wind_speed_unit: "kmh",
-          timezone: "auto",
-          forecast_days: 7,
-        },
-        timeout: AXIOS_TIMEOUT_MS,
-      });
+      // Fire both API calls in parallel to stay within Vercel's 10s function limit
+      const [response, aqiResponseRaw] = await Promise.allSettled([
+        axios.get("https://api.open-meteo.com/v1/forecast", {
+          params: {
+            latitude: lat, longitude: lon,
+            current: "temperature_2m,relative_humidity_2m,apparent_temperature",
+            hourly: "temperature_2m,relative_humidity_2m,apparent_temperature",
+            daily: "temperature_2m_max,temperature_2m_min,relative_humidity_2m_max,relative_humidity_2m_min,precipitation_probability_max,wind_speed_10m_max",
+            temperature_unit: "celsius",
+            wind_speed_unit: "kmh",
+            timezone: "auto",
+            forecast_days: 7,
+          },
+          timeout: AXIOS_TIMEOUT_MS,
+        }),
+        axios.get("https://air-quality-api.open-meteo.com/v1/air-quality", {
+          params: { latitude: lat, longitude: lon, current: "us_aqi,pm2_5,pm10" },
+          timeout: AXIOS_TIMEOUT_MS,
+        }),
+      ]);
 
-      const data = response.data;
+      if (response.status === "rejected") throw response.reason;
+      const data = response.value.data;
 
       if (!data?.current || !data?.hourly) throw new Error("Invalid response from weather API");
       if (typeof data.current.temperature_2m !== "number" || typeof data.current.relative_humidity_2m !== "number" || typeof data.current.apparent_temperature !== "number") {
@@ -337,12 +345,8 @@ export function registerRoutes(app: Express): void {
       const location: Location = { name: locationName, latitude: lat, longitude: lon, country, admin1 };
 
       let airQuality = undefined;
-      try {
-        const aqiResponse = await axios.get("https://air-quality-api.open-meteo.com/v1/air-quality", {
-          params: { latitude: lat, longitude: lon, current: "us_aqi,pm2_5,pm10" },
-          timeout: AXIOS_TIMEOUT_MS,
-        });
-        const aqiData = aqiResponse.data;
+      if (aqiResponseRaw.status === "fulfilled") {
+        const aqiData = aqiResponseRaw.value.data;
         if (aqiData?.current && typeof aqiData.current.us_aqi === "number") {
           airQuality = {
             aqi: Math.round(aqiData.current.us_aqi),
@@ -352,8 +356,8 @@ export function registerRoutes(app: Express): void {
             time: aqiData.current.time || data.current.time,
           };
         }
-      } catch (aqiError) {
-        logger.warn("aqi_fetch_error_non_fatal", { error: String(aqiError) });
+      } else {
+        logger.warn("aqi_fetch_error_non_fatal", { error: String(aqiResponseRaw.reason) });
       }
 
       const weatherData: WeatherData = {
